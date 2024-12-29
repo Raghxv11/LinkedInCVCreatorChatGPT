@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { VscGear } from "react-icons/vsc";
-import { PAGES } from "../utils/pages";
+import React, { useState, useEffect } from "react";
+import { CiSettings } from "react-icons/ci";
+import { routes } from "../utils/routes";
 import { loadData } from "../utils/localStorage";
-import { postChatGPTMessage } from "../utils/chatGPT";
+import { generateCoverLetter } from "../utils/gemini";
 
-function Generator({ setPage, resume, openAIKey }) {
+function Generator({ setPage, resume }) {
   const [jobDescription, setJobDescription] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,49 +23,52 @@ function Generator({ setPage, resume, openAIKey }) {
     getJobDescription();
   }, []);
 
-  const generateCoverLetter = async () => {
-    setIsLoading(true);
 
+
+  const generateLetter = async () => {
+    setIsLoading(true);
     try {
-      // Create message to send to chatGPT API
-      const message = `Generate a cover letter based on the following resume and job description:\n\nRESUME:\n${resume}\n\nJob Description:\n${jobDescription}`;
-      // Send message to chatGPT API and wait for response
-      const chatGPTResponse = await postChatGPTMessage(message, openAIKey);
-      // Update state with generated cover letter
-      setCoverLetter(chatGPTResponse);
+      const prompt = `Generate a professional cover letter based on the following resume and job description:
+
+Resume:
+${resume}
+
+Job Description:
+${jobDescription}
+
+Write a compelling cover letter that highlights relevant experience and skills from the resume that match the job requirements using the information in the job description.`;
+      
+      const letter = await generateCoverLetter(prompt);
+      setCoverLetter(letter);
     } catch (error) {
-      console.error(error);
+      console.error("Error generating cover letter:", error);
+      // Optionally show error to user
+      setCoverLetter("An error occurred while generating the cover letter. Please try again.");
     } finally {
-      // Set loading state to false once the process is complete (whether it was successful or not)
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-row justify-between mx-5 my-3 items-center">
-        <button
-          disabled={isLoading}
-          onClick={generateCoverLetter}
-          className="border-2 border-solid border-blue-500 text-blue-500 text-lg font-bold rounded-md px-3 py-2 hover:text-white hover:bg-blue-500"
-        >
-          {isLoading ? "Generating..." : "Generate"}
-        </button>
-        <h2 className="text-2xl font-bold">LinkedIn Cover Letter Generator</h2>
-        <button
-          onClick={() => setPage(PAGES.PROFILE)}
-          className="border mr-[1px] p-2 border-solid border-gray-600 rounded-[100%] hover:bg-gray-200 hover:border-2 hover:mr-0 transition duration-300 ease-in-out"
-        >
-          <VscGear className="text-[150%] text-gray-500" />
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="flex flex-row justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Cover Letter Generator</h2>
+        <button className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" onClick={()=>setPage(routes.PROFILE)}>
+          <CiSettings className="w-6 h-6" />
         </button>
       </div>
-      <div className="flex mx-5">
+      <div className="w-full">
         <textarea
-          rows={12}
-          className="w-full"
-          placeholder="Generated cover letter"
           value={coverLetter}
+          onChange={(e) => setCoverLetter(e.target.value)}
+          className="w-full min-h-[400px] p-4 rounded-lg border border-gray-200 dark:border-gray-700 
+          bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent
+          resize-none outline-none transition-all"
+          placeholder="Your generated cover letter will appear here..."
         />
+        <button className="bg-blue-500 hover:bg-blue-600 w-fit mt-4 text-white font-semibold rounded-lg px-6 py-2.5 transition-colors" onClick={generateLetter}>
+          {isLoading ? "Generating..." : "Generate Cover Letter"}
+        </button>
       </div>
     </div>
   );

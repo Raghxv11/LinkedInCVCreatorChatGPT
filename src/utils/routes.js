@@ -1,4 +1,4 @@
-export const PAGES = {
+export const routes = {
     "GENERATOR": "GENERATOR",
     "PROFILE": "PROFILE"
 }

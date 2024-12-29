@@ -1,106 +1,97 @@
-import React from "react";
-import { MdArrowBack } from "react-icons/md";
-import { PAGES } from "../utils/pages";
-import { ToastContainer, toast } from "react-toastify";
-import { saveData } from "../utils/localStorage";
+import React, { useRef } from 'react'
+import { ArrowLeft, Upload } from 'lucide-react'
+import { routes } from "../utils/routes";
+import { saveResume } from "../utils/localStorage";
 
-function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
-  const handleSubmt = (e) => {
+function Profile({ setPage, resume, setResume }) {
+  const fileInputRef = useRef(null);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const updatedResume = formData.get("resume");
-    const updatedOpenAIKey = formData.get("openAIKey");
+    const updatedResume = formData.get('resume');
+    setResume(updatedResume);
+    saveResume('resume', updatedResume);
+  }
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
     try {
-      setResume(updatedResume);
-      saveData("resume", updatedResume);
-
-      saveData("openAIKey", updatedOpenAIKey);
-      setOpenAIKey(updatedOpenAIKey);
-      toast.success("Saved successfully!", {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      const text = await file.text();
+      setResume(text);
+      saveResume('resume', text);
     } catch (error) {
-      console.error("Error saving data.");
-      console.error(error);
-      toast.error("Error saving. Please try again", {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      console.error('Error reading file:', error);
+      alert('Error reading file. Please try again.');
     }
   };
 
   return (
-    <div className="flex flex-col  mx-5">
-      <div className="flex flex-row justify-between my-3 items-center">
-        <h2 className="text-2xl font-bold">Profile</h2>
-        <button
-          onClick={() => setPage(PAGES.GENERATOR)}
-          className="border mr-[1px] p-2 border-solid border-gray-600 rounded-[100%] hover:bg-gray-200 hover:border-2 hover:mr-0 transition duration-300 ease-in-out"
-        >
-          <MdArrowBack className="text-[150%] text-gray-500" />
-        </button>
-      </div>
-
-      <form className="flex-col" onSubmit={handleSubmt}>
-        <div className="mb-6">
-          <label
-            htmlFor="openAIKey"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
-            Your Open AI Key
-          </label>
-          <input
-            id="openAIKey"
-            name="openAIKey"
-            type="text"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="sk-...1234"
-            defaultValue={openAIKey}
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label
-            htmlFor="resume"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <button 
+        className="flex items-center gap-2 mb-6" 
+        onClick={() => setPage(routes.GENERATOR)}
+      >
+        <ArrowLeft className="w-6 h-6" />
+        <span>Back</span>
+      </button>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label 
+            htmlFor="resume" 
+            className="block text-lg font-medium mb-2"
           >
             Your Resume
           </label>
-          <textarea
-            id="resume"
-            name="resume"
-            defaultValue={resume}
-            rows={8}
-            className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="Paste your resume here..."
-          ></textarea>
+          <div className="space-y-4">
+            {/* <div 
+              className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Click to upload or drag and drop your resume
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                Supported formats: TXT, PDF, DOCX
+              </p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept=".txt,.pdf,.docx"
+                onChange={handleFileUpload}
+              />
+            </div> */}
+            <div className="relative">
+              <textarea 
+                name="resume" 
+                id="resume" 
+                rows={8} 
+                placeholder='Or paste your resume here...'
+                value={resume}
+                onChange={(e) => setResume(e.target.value)}
+                className="w-full p-4 rounded-lg border border-gray-200 dark:border-gray-700 
+                  bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                  resize-none outline-none transition-all"
+              />
+            </div>
+          </div>
         </div>
-        <div className="mb-6 text-center">
-          <button
+        <div>
+          <button 
             type="submit"
-            className="border-2 border-solid border-blue-500 text-blue-500 text-lg rounded-md px-5 py-2 hover:text-white hover:bg-blue-500"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold 
+              rounded-lg px-6 py-2.5 transition-colors"
           >
             Save
           </button>
         </div>
       </form>
-      <ToastContainer />
     </div>
-  );
+  )
 }
 
-export default Profile;
+export default Profile

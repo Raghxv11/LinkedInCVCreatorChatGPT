@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import "react-toastify/dist/ReactToastify.css";
-import { PAGES } from "./utils/pages";
+import { routes } from "./utils/routes";
 import Generator from "./pages/Generator";
 import Profile from "./pages/Profile";
 import { loadData } from "./utils/localStorage";
 
 function App() {
   // State management
-  const [page, setPage] = useState(PAGES.GENERATOR);
+  const [page, setPage] = useState(routes.GENERATOR);
   const [openAIKey, setOpenAIKey] = useState();
   const [resume, setResume] = useState();
 
@@ -27,12 +27,12 @@ function App() {
 
   // Render components based on the current page
   switch (page) {
-    case PAGES.GENERATOR:
+    case routes.GENERATOR:
       return (
         <Generator setPage={setPage} resume={resume} openAIKey={openAIKey} />
       );
 
-    case PAGES.PROFILE:
+    case routes.PROFILE:
       return (
         <Profile
           setPage={setPage}
