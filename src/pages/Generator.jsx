@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CiSettings } from "react-icons/ci";
+import { FiDownload } from "react-icons/fi";
+import { Document, Packer, Paragraph, TextRun } from "docx";
+import { jsPDF } from "jspdf";
 import { routes } from "../utils/routes";
 import { loadData } from "../utils/localStorage";
 import { generateCoverLetter } from "../utils/gemini";
@@ -8,13 +11,17 @@ function Generator({ setPage, resume }) {
   const [jobDescription, setJobDescription] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showJobDescInput, setShowJobDescInput] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
-    // Load job description from local storage on component mount
     const getJobDescription = async () => {
       try {
         const description = await loadData("jobDescription");
-        setJobDescription(description);
+        if (description) {
+          setJobDescription(description);
+          setShowJobDescInput(true);
+        }
       } catch (error) {
         console.error("Error while fetching job description", error);
       }
@@ -23,7 +30,79 @@ function Generator({ setPage, resume }) {
     getJobDescription();
   }, []);
 
+  const createDocx = async (text) => {
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: text.split('\n').map(line => 
+          new Paragraph({
+            children: [new TextRun(line)],
+            spacing: {
+              after: 200
+            }
+          })
+        )
+      }]
+    });
+    
+    return await Packer.toBlob(doc);
+  };
 
+  const createPDF = (text) => {
+    const pdf = new jsPDF();
+    const splitText = pdf.splitTextToSize(text, 180);
+    pdf.text(splitText, 15, 15);
+    return pdf.output('blob');
+  };
+
+  const handleDownload = async () => {
+    if (!coverLetter) return;
+
+    try {
+      const options = {
+        suggestedName: 'cover-letter.docx',
+        types: [
+          {
+            description: 'Word Document',
+            accept: {
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+            }
+          },
+          {
+            description: 'PDF Document',
+            accept: {
+              'application/pdf': ['.pdf']
+            }
+          },
+          {
+            description: 'Text Document',
+            accept: {
+              'text/plain': ['.txt']
+            }
+          }
+        ]
+      };
+
+      const handle = await window.showSaveFilePicker(options);
+      const writable = await handle.createWritable();
+
+      let blob;
+      if (handle.name.endsWith('.docx')) {
+        blob = await createDocx(coverLetter);
+      } else if (handle.name.endsWith('.pdf')) {
+        blob = createPDF(coverLetter);
+      } else {
+        // Default to txt
+        blob = new Blob([coverLetter], { type: 'text/plain' });
+      }
+
+      await writable.write(blob);
+      await writable.close();
+    } catch (err) {
+      // User cancelled or error occurred
+      console.error('Failed to save file:', err);
+    }
+  };
 
   const generateLetter = async () => {
     setIsLoading(true);
@@ -82,6 +161,7 @@ Make sure the letter:
       </div>
 
       <div className="flex-1 overflow-auto p-4 space-y-4">
+
         <div className="bg-gray-800 rounded-lg shadow-md border border-gray-700">
           <textarea
             value={coverLetter}
@@ -92,22 +172,70 @@ Make sure the letter:
             placeholder="Your generated cover letter will appear here..."
           />
         </div>
-        
-        <button 
-          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
-          w-full text-white font-medium rounded-lg px-4 py-2.5 transition-all duration-200 
-          shadow-md hover:shadow-lg text-sm"
-          onClick={generateLetter}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-t-2 border-white rounded-full animate-spin" />
-              <span>Generating...</span>
+
+        {!showJobDescInput ? (
+          <p
+            onClick={() => setShowJobDescInput(true)}
+            className="w-full pt-2 text-gray-400 hover:text-white
+             hover:underline 
+            transition-all duration-200 text-sm text-center"
+          >
+            Click here to manually paste the job description
+          </p>
+        ) : (
+          <div className="bg-gray-800 rounded-lg shadow-md border border-gray-700">
+            <div className="flex justify-between items-center p-2 border-b border-gray-700">
+              <span className="text-sm text-gray-400 px-2">Job Description</span>
+              <button
+                onClick={() => {
+                  setShowJobDescInput(false);
+                  setJobDescription("");
+                }}
+                className="text-gray-500 hover:text-white text-sm px-2 py-1 
+                rounded hover:bg-gray-700 transition-colors"
+              >
+                Hide
+              </button>
             </div>
-          ) : (
-            "Generate Cover Letter"
+            <textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              className="w-full h-[200px] p-4 rounded-b-lg bg-transparent
+              focus:ring-0 border-none outline-none resize-none
+              text-gray-300 text-sm placeholder-gray-500"
+              placeholder="Paste job description here..."
+            />
+          </div>
+        )}
+        
+        <div className="flex gap-3">
+          <button 
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
+            text-white font-medium rounded-lg px-4 py-2.5 transition-all duration-200 
+            shadow-md hover:shadow-lg text-sm"
+            onClick={generateLetter}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-t-2 border-white rounded-full animate-spin" />
+                <span>Generating...</span>
+              </div>
+            ) : (
+              "Generate Cover Letter"
+            )}
+          </button>
+
+          {coverLetter && (
+            <button
+              onClick={handleDownload}
+              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg
+              transition-all duration-200 flex items-center gap-2 border border-gray-700"
+            >
+              <FiDownload className="w-4 h-4" />
+              <span>Save As</span>
+            </button>
           )}
-        </button>
+        </div>
       </div>
     </div>
   );
