@@ -36,7 +36,24 @@ ${resume}
 Job Description:
 ${jobDescription}
 
-Write a compelling cover letter that highlights relevant experience and skills from the resume that match the job requirements using the information in the job description.`;
+Make sure the letter:
+- uses correct business format with date and addresses at the top, and a signature at the bottom
+- is concise and grammatically correct
+- has a strong introduction that:
+  • clearly identifies the position you're applying for
+  • explains how you heard about the opening
+  • describes why you're interested in a compelling way
+  • catches attention quickly
+- has a focused middle section that:
+  • highlights 1-2 of your strongest qualifications (from the resume)
+  • specifically relates your skills to the job requirements
+  • explains your interest in the position, company, and/or location
+  • adds value beyond just restating your resume
+- has a strong closing that:
+  • refers to your resume and any other enclosed documents
+  • thanks the reader for their time
+  • describes how and when you will follow up
+`;
       
       const letter = await generateCoverLetter(prompt);
       setCoverLetter(letter);
@@ -50,24 +67,46 @@ Write a compelling cover letter that highlights relevant experience and skills f
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex flex-row justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Cover Letter Generator</h2>
-        <button className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" onClick={()=>setPage(routes.PROFILE)}>
-          <CiSettings className="w-6 h-6" />
+    <div className="h-full flex flex-col bg-gray-900">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
+        <div>
+          <h2 className="text-xl font-bold text-white">Streamline your job application process</h2>
+          <p className="text-sm text-gray-400">Create professional cover letters in seconds</p>
+        </div>
+        <button 
+          className="p-2 hover:bg-gray-800 rounded-full transition-colors duration-200 group"
+          onClick={() => setPage(routes.PROFILE)}
+        >
+          <CiSettings className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:rotate-45 transition-all duration-200" />
         </button>
       </div>
-      <div className="w-full">
-        <textarea
-          value={coverLetter}
-          onChange={(e) => setCoverLetter(e.target.value)}
-          className="w-full min-h-[400px] p-4 rounded-lg border border-gray-200 dark:border-gray-700 
-          bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent
-          resize-none outline-none transition-all"
-          placeholder="Your generated cover letter will appear here..."
-        />
-        <button className="bg-blue-500 hover:bg-blue-600 w-fit mt-4 text-white font-semibold rounded-lg px-6 py-2.5 transition-colors" onClick={generateLetter}>
-          {isLoading ? "Generating..." : "Generate Cover Letter"}
+
+      <div className="flex-1 overflow-auto p-4 space-y-4">
+        <div className="bg-gray-800 rounded-lg shadow-md border border-gray-700">
+          <textarea
+            value={coverLetter}
+            onChange={(e) => setCoverLetter(e.target.value)}
+            className="w-full h-[400px] p-4 rounded-lg bg-transparent
+            focus:ring-0 border-none outline-none resize-none
+            text-gray-300 text-sm placeholder-gray-500"
+            placeholder="Your generated cover letter will appear here..."
+          />
+        </div>
+        
+        <button 
+          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
+          w-full text-white font-medium rounded-lg px-4 py-2.5 transition-all duration-200 
+          shadow-md hover:shadow-lg text-sm"
+          onClick={generateLetter}
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-t-2 border-white rounded-full animate-spin" />
+              <span>Generating...</span>
+            </div>
+          ) : (
+            "Generate Cover Letter"
+          )}
         </button>
       </div>
     </div>

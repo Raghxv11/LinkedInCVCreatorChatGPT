@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Cover Letter Generator",
+  "name": "AI Cover Letter Generator for ASU",
   "version": "1.0.0",
-  "description": "AI-powered Chrome extension to generate cover letters.",
+  "description": "Generate personalized cover letters that are tailored to your resume and the job description in seconds.",
   "permissions": ["activeTab", "storage", "scripting", "tabs"],
   "icons": {
     "16": "icon.png",
@@ -14,7 +14,9 @@
     "default_title": "Open the popup"
   },
   "host_permissions": [
-    "https://www.linkedin.com/*"
+    "https://www.linkedin.com/*",
+    "https://app.joinhandshake.com/*",
+    "https://www.myworkday.com/*"
   ],
   "background": {
     "service_worker": "background.js"
