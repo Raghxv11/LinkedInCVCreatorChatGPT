@@ -26,20 +26,21 @@ function getJobDescriptionSelectors(url) {
       ".job-view-layout jobs-details",
     ];
   } 
-  else if (url.startsWith(joinHandshakeListViewURL)) {
-    return [
-      ".style__details___zB6XF",
-      ".style__description-container___1_dQK",
-      "[data-testid='job-details-description']"
-    ];
-  } else if (url.startsWith(joinHandshakeDetailView)) {
-    return [
-      ".style__description___2dvUH",
-      ".style__container___cYZJJ",
-      "[data-testid='description']",
-      ".job-description"
-    ];
-  } else if (url.startsWith(asu)) {
+  // else if (url.startsWith(joinHandshakeListViewURL)) {
+  //   return [
+  //     ".style__details___zB6XF",
+  //     ".style__description-container___1_dQK",
+  //     "[data-testid='job-details-description']"
+  //   ];
+  // } else if (url.startsWith(joinHandshakeDetailView)) {
+  //   return [
+  //     ".style__description___2dvUH",
+  //     ".style__container___cYZJJ",
+  //     "[data-testid='description']",
+  //     ".job-description"
+  //   ];
+  // } 
+  else if (url.startsWith(asu)) {
     return [
       "[data-automation-id='jobPostingDescription']",
       ".WE0F",
@@ -103,8 +104,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (
       tab.url?.startsWith(linkedInListViewURL) ||
       tab.url?.startsWith(linkedInDetailView) ||
-      tab.url?.startsWith(joinHandshakeListViewURL) ||
-      tab.url?.startsWith(joinHandshakeDetailView) ||
+      // tab.url?.startsWith(joinHandshakeListViewURL) ||
+      // tab.url?.startsWith(joinHandshakeDetailView) ||
       tab.url?.startsWith(asu)
     ) {
       console.log("Job page detected");
