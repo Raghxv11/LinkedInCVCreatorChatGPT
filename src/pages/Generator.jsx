@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { CiSettings } from "react-icons/ci";
 import { FiDownload } from "react-icons/fi";
 import { Document, Packer, Paragraph, TextRun } from "docx";
-import { jsPDF } from "jspdf";
+// import { jsPDF } from "jspdf";
 import { routes } from "../utils/routes";
 import { loadData } from "../utils/localStorage";
 import { generateCoverLetter } from "../utils/gemini";
@@ -33,12 +33,29 @@ function Generator({ setPage, resume }) {
   const createDocx = async (text) => {
     const doc = new Document({
       sections: [{
-        properties: {},
+        properties: {
+          page: {
+            margin: {
+              top: 1440, // 1 inch
+              right: 1440,
+              bottom: 1440,
+              left: 1440
+            }
+          }
+        },
         children: text.split('\n').map(line => 
           new Paragraph({
-            children: [new TextRun(line)],
+            children: [
+              new TextRun({
+                text: line,
+                size: 24, // 12pt font
+                font: "Times New Roman"
+              })
+            ],
             spacing: {
-              after: 200
+              after: 240, // 12pt spacing
+              line: 240, // 1 line spacing
+              lineRule: "auto"
             }
           })
         )
@@ -48,12 +65,12 @@ function Generator({ setPage, resume }) {
     return await Packer.toBlob(doc);
   };
 
-  const createPDF = (text) => {
-    const pdf = new jsPDF();
-    const splitText = pdf.splitTextToSize(text, 180);
-    pdf.text(splitText, 15, 15);
-    return pdf.output('blob');
-  };
+  // const createPDF = (text) => {
+  //   const pdf = new jsPDF();
+  //   const splitText = pdf.splitTextToSize(text, 180);
+  //   pdf.text(splitText, 15, 15);
+  //   return pdf.output('blob');
+  // };
 
   const handleDownload = async () => {
     if (!coverLetter) return;
@@ -68,12 +85,12 @@ function Generator({ setPage, resume }) {
               'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
             }
           },
-          {
-            description: 'PDF Document',
-            accept: {
-              'application/pdf': ['.pdf']
-            }
-          },
+          // {
+          //   description: 'PDF Document',
+          //   accept: {
+          //     'application/pdf': ['.pdf']
+          //   }
+          // },
           {
             description: 'Text Document',
             accept: {
@@ -89,9 +106,11 @@ function Generator({ setPage, resume }) {
       let blob;
       if (handle.name.endsWith('.docx')) {
         blob = await createDocx(coverLetter);
-      } else if (handle.name.endsWith('.pdf')) {
-        blob = createPDF(coverLetter);
-      } else {
+      } 
+      // else if (handle.name.endsWith('.pdf')) {
+      //   blob = createPDF(coverLetter);
+      // } 
+      else {
         // Default to txt
         blob = new Blob([coverLetter], { type: 'text/plain' });
       }

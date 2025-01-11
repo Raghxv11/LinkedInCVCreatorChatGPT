@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "./App.css";
+// import "./App.css";
 import "react-toastify/dist/ReactToastify.css";
 import { routes } from "./utils/routes";
 import Generator from "./pages/Generator";

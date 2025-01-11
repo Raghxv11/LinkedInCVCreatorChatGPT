@@ -15,7 +15,6 @@
   },
   "host_permissions": [
     "https://www.linkedin.com/*",
-    "https://app.joinhandshake.com/*",
     "https://www.myworkday.com/*"
   ],
   "background": {

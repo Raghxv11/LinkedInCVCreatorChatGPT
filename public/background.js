@@ -4,8 +4,8 @@ console.log("Background working");
 // Declaring constants to store LinkedIn URLs.
 const linkedInListViewURL = "https://www.linkedin.com/jobs/collections";
 const linkedInDetailView = "https://www.linkedin.com/jobs/view";
-const joinHandshakeListViewURL = "https://app.joinhandshake.com/stu/postings";
-const joinHandshakeDetailView = "https://app.joinhandshake.com/stu/jobs";
+// const joinHandshakeListViewURL = "https://app.joinhandshake.com/stu/postings";
+// const joinHandshakeDetailView = "https://app.joinhandshake.com/stu/jobs";
 const asu = "https://www.myworkday.com/asu";
 
 // This function returns an array of possible selectors to try
